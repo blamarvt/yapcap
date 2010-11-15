@@ -4,7 +4,7 @@ import setuptools
 from distutils.core import setup, Extension
 
 cYapcap = Extension('cYapcap', 
-    sources   = ['yapcap.c'],
+    sources   = ['cyapcap/yapcap.c'],
     libraries = ['pcap'],
 )
 
