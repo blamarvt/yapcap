@@ -37,16 +37,21 @@ callbackWrapper(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char* pa
 
     pkt = Py_BuildValue("s#", packet, pkthdr->caplen);
 
-    PyEval_CallFunction(py_callback_func, "OO", summary, pkt);
+    if(PyEval_CallFunction(py_callback_func, "OO", summary, pkt) == NULL)
+    {
+        PyErr_Print();
+        Py_Exit(-1);
+    }
 }
 
 static PyObject *
 capture(PyObject *self, PyObject *args)
 {
-    char     *device = NULL;
-    char     *errbuf = (char *) malloc (PCAP_ERRBUF_SIZE);
-    pcap_t   *descr  = NULL;
-    PyObject *cb     = NULL;
+    char     *device  = NULL;
+    char     *errbuf  = (char *) malloc (PCAP_ERRBUF_SIZE);
+    pcap_t   *descr   = NULL;
+    PyObject *cb      = NULL;
+    int      datatype = 0;
 
     memset(errbuf, 0, PCAP_ERRBUF_SIZE);
 
@@ -68,14 +73,23 @@ capture(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    /* Assign callback */
     py_callback_func = cb;
 
-    //device = pcap_lookupdev(errbuf);
-    descr  = pcap_open_live(device, MAX_CAPTURE, 1, 512, errbuf);
+    descr = pcap_open_live(device, MAX_CAPTURE, 1, 512, errbuf);
 
+    /* Ensure we could open the device */
     if (descr == NULL)
     {
         PyErr_SetString(PyExc_RuntimeError, "Can't find device, are you root?");
+        return NULL;
+    }
+
+    datatype = pcap_datalink(descr);
+
+    if (datatype != DLT_EN10MB && datatype != DLT_IEEE802_11) 
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Unsuitable device. Ethernet/Wireless devices only.");
         return NULL;
     }
 
@@ -85,7 +99,7 @@ capture(PyObject *self, PyObject *args)
 }
 
 PyMODINIT_FUNC
-initcYapcap(void)
+initcyapcap(void)
 {
-    (void) Py_InitModule("cYapcap", YapcapMethods);
+    (void) Py_InitModule("cyapcap", YapcapMethods);
 }

@@ -3,15 +3,16 @@
 import setuptools
 from distutils.core import setup, Extension
 
-cYapcap = Extension('cYapcap', 
+cYapcap = Extension('cyapcap', 
     sources   = ['cyapcap/yapcap.c'],
     libraries = ['pcap'],
 )
 
 setup (
     name             = 'python-yapcap',
-    version          = '0.1',
+    version          = '0.2.1',
     description      = 'Yet Another Packet Captor',
     ext_modules      = [cYapcap],
-    install_requires = ['packet', 'BitVector'],
+    install_requires = ['BitPacket'],
+    packages         = ['cyapcap', 'yapcap']
 )
