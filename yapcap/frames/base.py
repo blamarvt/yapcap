@@ -1,12 +1,27 @@
 """
-frames.py
+base.py
 """
 
 from BitPacket import BitStructure, BitField
 
 class Frame(object):
+    """
+    Frame
+    """
+
     def __init__(self, data):
         self.data = data
+        self.layers = []
+        self.fields = []
+        self.structure = BitStructure(self.__class__.__name__)
+
+    def add_field(self, name, bits, format_cls=None):
+        """
+        @param name: The name of the field
+        @param bits: The number of bits
+        @param format_cls: The format class for the field
+        """
+        self.structure.append(BitField(name, bits))
 
     def check(self):
         """
@@ -72,47 +87,4 @@ class Frame(object):
         Handle output from a BitField.
         """
         return self.structure[key]
-
-class IEEE_8023_Frame(Frame):
-    def __init__(self, data):
-        Frame.__init__(self, data)
-
-        self.structure = BitStructure("IEEE_8023_Frame")
-        self.structure.append(BitField("dst_mac",   48))
-        self.structure.append(BitField("src_mac",   48))
-        self.structure.append(BitField("ethertype", 16))
-
-        self.check()
-        self.claim_data()
-
-        self.structure.set_bytes(self.data)
-
-#    ethertype = property(fget=lambda self: self.structure["ethertype"])
-
-
-class IPv4_Frame(Frame):
-    def __init__(self, data):
-        Frame.__init__(self, data)
-
-        self.structure = BitStructure("IPv4_Frame")
-        self.structure.append(BitField("version",   4))
-        self.structure.append(BitField("hlen",      4))
-        self.structure.append(BitField("codepoint", 6))
-        self.structure.append(BitField("unused",    2))
-        self.structure.append(BitField("total_len", 16))
-        self.structure.append(BitField("ident",     16))
-        self.structure.append(BitField("reserved",  1))
-        self.structure.append(BitField("no_frag",   1))
-        self.structure.append(BitField("more_frag", 1))
-        self.structure.append(BitField("offset",    13))
-        self.structure.append(BitField("ttl",       8))
-        self.structure.append(BitField("protocol",  8))
-        self.structure.append(BitField("hchksum",   16))
-        self.structure.append(BitField("src_ip",    32))
-        self.structure.append(BitField("dst_ip",    32))
-
-        self.check()
-        self.claim_data()
-
-        self.structure.set_bytes(self.data)
 

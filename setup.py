@@ -13,6 +13,6 @@ setup (
     version          = '0.2.1',
     description      = 'Yet Another Packet Captor',
     ext_modules      = [cYapcap],
-    install_requires = ['BitPacket'],
+    install_requires = ['impacket'],
     packages         = ['cyapcap', 'yapcap']
 )
