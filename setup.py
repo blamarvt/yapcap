@@ -14,5 +14,10 @@ setup (
     description      = 'Yet Another Packet Captor',
     ext_modules      = [cYapcap],
     install_requires = ['impacket'],
-    packages         = ['cyapcap', 'yapcap']
+    packages         = [
+        'cyapcap', 
+        'yapcap', 
+        'yapcap.util', 
+        'yapcap.frames'
+    ]
 )

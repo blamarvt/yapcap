@@ -1,38 +1,39 @@
 """
-layer3.py
+yapcap.frames.layer3
 """
 
-from BitPacket import BitStructure, BitField
+import socket
 
-from yapcap.frames import Frame
+import yapcap.util as util
+
+from .base import Frame
+from .layer4 import TCP_Frame
 
 class IPv4_Frame(Frame):
     """
     IPv4_Frame
     """
 
-    def __init__(self, data):
-        Frame.__init__(self, data)
+    @staticmethod
+    def decode(pkt, data):
+        pkt.protocols.append("IP")
+        data = pkt.add_field(data, "ip_version",   4)
+        data = pkt.add_field(data, "ip_hlen",      4)
+        data = pkt.add_field(data, "ip_codepoint", 6)
+        data = pkt.add_field(data, "ip_unused",    2)
+        data = pkt.add_field(data, "ip_total_len", 16)
+        data = pkt.add_field(data, "ip_ident",     16)
+        data = pkt.add_field(data, "ip_reserved",  1)
+        data = pkt.add_field(data, "ip_no_frag",   1)
+        data = pkt.add_field(data, "ip_more_frag", 1)
+        data = pkt.add_field(data, "ip_offset",    13)
+        data = pkt.add_field(data, "ip_ttl",       8)
+        data = pkt.add_field(data, "ip_protocol",  8, util.IPv4_Protocol_Format)
+        data = pkt.add_field(data, "ip_hchksum",   16)
+        data = pkt.add_field(data, "src_ip",       32, util.IPv4_Format)
+        data = pkt.add_field(data, "dst_ip",       32, util.IPv4_Format)
 
-        self.structure = BitStructure("IPv4_Frame")
-        self.structure.append(BitField("version",   4))
-        self.structure.append(BitField("hlen",      4))
-        self.structure.append(BitField("codepoint", 6))
-        self.structure.append(BitField("unused",    2))
-        self.structure.append(BitField("total_len", 16))
-        self.structure.append(BitField("ident",     16))
-        self.structure.append(BitField("reserved",  1))
-        self.structure.append(BitField("no_frag",   1))
-        self.structure.append(BitField("more_frag", 1))
-        self.structure.append(BitField("offset",    13))
-        self.structure.append(BitField("ttl",       8))
-        self.structure.append(BitField("protocol",  8))
-        self.structure.append(BitField("hchksum",   16))
-        self.structure.append(BitField("src_ip",    32))
-        self.structure.append(BitField("dst_ip",    32))
+        if pkt["ip_protocol"] is socket.IPPROTO_TCP:
+            return TCP_Frame.decode(pkt, data)
 
-        self.check()
-        self.claim_data()
-
-        self.structure.set_bytes(self.data)
-
+        return data
