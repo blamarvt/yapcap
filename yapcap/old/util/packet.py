@@ -4,7 +4,7 @@ yapcap.util.packet
 
 import struct
 
-from BitPacket import BitStructure, BitField, Container, Value
+from BitPacket import BitStructure, BitField, Value
 
 class YapcapPacket(BitStructure):
     """
@@ -40,7 +40,7 @@ class YapcapPacket(BitStructure):
         field = BitField(name, bits)
         self.append(field)
 
-        num_bits = Container.size(self)
+        num_bits = 1
         if num_bits % 8 == 0 or force_assign:
             self.set_bytes(data[0:self.size()])
             data = data[self.size():]
